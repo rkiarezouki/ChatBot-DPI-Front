@@ -27,7 +27,7 @@
 
 <script>
 export default {
-  name: 'MyChatbot',  // Nom du composant changé ici
+  name: 'MyChatbot',
   data() {
     return {
       userInput: '',
@@ -37,22 +37,24 @@ export default {
   methods: {
     sendMessage() {
       if (this.userInput.trim()) {
-        // Ajouter le message de l'utilisateur
         this.messages.push({ sender: 'user', text: this.userInput });
-
-        // Effacer l'input après l'envoi du message
         this.userInput = '';
-
-        // Simuler une réponse du bot
+        this.$nextTick(() => this.scrollToBottom());
         this.simulateBotResponse();
       }
     },
     simulateBotResponse() {
-      // Réponse du bot après un délai de 500ms
       setTimeout(() => {
         const botResponse = `Bot: Vous avez dit "${this.messages[this.messages.length - 1].text}"`;
         this.messages.push({ sender: 'bot', text: botResponse });
+        this.$nextTick(() => this.scrollToBottom());
       }, 500);
+    },
+    scrollToBottom() {
+      const chatWindow = this.$el.querySelector('.chat-window');
+      if (chatWindow) {
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
     }
   }
 };
@@ -60,8 +62,8 @@ export default {
 
 <style scoped>
 .chatbot-container {
-  width: 400px;
-  height: 500px;
+  width: 100%;
+  height: 550px;
   border: 1px solid #ccc;
   border-radius: 8px;
   display: flex;
@@ -72,7 +74,7 @@ export default {
 .chat-window {
   flex: 1;
   padding: 10px;
-  overflow-y: scroll;
+  overflow-y: auto; /* Permet le scroll interne */
   background-color: white;
   border-bottom: 1px solid #ddd;
 }
@@ -81,7 +83,7 @@ export default {
   padding: 5px;
   margin-bottom: 10px;
   border-radius: 5px;
-  max-width: 75%;
+  max-width: 100%;
   word-wrap: break-word;
 }
 
