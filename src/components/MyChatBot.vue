@@ -35,21 +35,43 @@ export default {
     };
   },
   methods: {
-    sendMessage() {
+    async sendMessage() {
       if (this.userInput.trim()) {
+        // Ajouter le message de l'utilisateur au chat
         this.messages.push({ sender: 'user', text: this.userInput });
+
+        const userMessage = this.userInput;
         this.userInput = '';
         this.$nextTick(() => this.scrollToBottom());
-        this.simulateBotResponse();
+
+        // Envoyer la requête au backend
+        await this.fetchBotResponse(userMessage);
       }
     },
-    simulateBotResponse() {
-      setTimeout(() => {
-        const botResponse = `Bot: Vous avez dit "${this.messages[this.messages.length - 1].text}"`;
-        this.messages.push({ sender: 'bot', text: botResponse });
-        this.$nextTick(() => this.scrollToBottom());
-      }, 500);
-    },
+    async fetchBotResponse(userMessage) {
+  try {
+    // Envoyer la question au backend
+    const response = await fetch('http://localhost:3001/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessage }) // Envoi de la question utilisateur
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la communication avec le serveur');
+    }
+
+    const data = await response.json(); // Récupération de la réponse du backend
+
+    // Ajouter la réponse du bot au chat
+    this.messages.push({ sender: 'bot', text: data.reply });
+    this.$nextTick(() => this.scrollToBottom());
+  } catch (error) {
+    console.error(error);
+    this.messages.push({ sender: 'bot', text: 'Une erreur est survenue. Réessayez plus tard.' });
+  }
+},
+
     scrollToBottom() {
       const chatWindow = this.$el.querySelector('.chat-window');
       if (chatWindow) {
@@ -58,6 +80,7 @@ export default {
     }
   }
 };
+
 </script>
 
 <style scoped>
