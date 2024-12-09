@@ -1,7 +1,7 @@
 <template>
   <div class="chatbot-container">
     <div class="chat-window">
-      <!-- Chat messages -->
+      <!-- Affichage des messages -->
       <div class="chat-log">
         <div 
           v-for="(message, index) in messages" 
@@ -13,7 +13,7 @@
       </div>
     </div>
     
-    <!-- User input -->
+    <!-- Zone de saisie -->
     <div class="input-area">
       <input 
         v-model="userInput" 
@@ -30,49 +30,51 @@ export default {
   name: 'MyChatbot',
   data() {
     return {
-      userInput: '',
-      messages: []
+      userInput: '', // Saisie de l'utilisateur
+      messages: []   // Historique des messages
     };
   },
   methods: {
     async sendMessage() {
+      // Vérification : message vide
       if (this.userInput.trim()) {
-        // Ajouter le message de l'utilisateur au chat
+        // Ajoute le message utilisateur dans l'historique
         this.messages.push({ sender: 'user', text: this.userInput });
 
-        const userMessage = this.userInput;
-        this.userInput = '';
-        this.$nextTick(() => this.scrollToBottom());
+        const userMessage = this.userInput; // Sauvegarde le message
+        this.userInput = ''; // Réinitialise le champ d'entrée
+        this.$nextTick(() => this.scrollToBottom()); // Scroll en bas
 
-        // Envoyer la requête au backend
+        // Envoie la requête au backend pour récupérer la réponse
         await this.fetchBotResponse(userMessage);
       }
     },
     async fetchBotResponse(userMessage) {
-  try {
-    // Envoyer la question au backend
-    const response = await fetch('http://localhost:3001/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage }) // Envoi de la question utilisateur
-    });
+      try {
+        // Envoie de la requête au backend
+        const response = await fetch('http://localhost:3001/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage }) // Envoie du message
+        });
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la communication avec le serveur');
-    }
+        if (!response.ok) {
+          throw new Error('Erreur lors de la communication avec le serveur');
+        }
 
-    const data = await response.json(); // Récupération de la réponse du backend
+        const data = await response.json(); // Récupère la réponse du backend
 
-    // Ajouter la réponse du bot au chat
-    this.messages.push({ sender: 'bot', text: data.reply });
-    this.$nextTick(() => this.scrollToBottom());
-  } catch (error) {
-    console.error(error);
-    this.messages.push({ sender: 'bot', text: 'Une erreur est survenue. Réessayez plus tard.' });
-  }
-},
-
+        // Ajoute la réponse du bot dans l'historique
+        this.messages.push({ sender: 'bot', text: data.reply });
+        this.$nextTick(() => this.scrollToBottom());
+      } catch (error) {
+        console.error(error);
+        // Message d'erreur en cas de problème
+        this.messages.push({ sender: 'bot', text: 'Une erreur est survenue. Réessayez plus tard.' });
+      }
+    },
     scrollToBottom() {
+      // Scroll automatique vers le bas de la fenêtre
       const chatWindow = this.$el.querySelector('.chat-window');
       if (chatWindow) {
         chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -80,7 +82,6 @@ export default {
     }
   }
 };
-
 </script>
 
 <style scoped>
