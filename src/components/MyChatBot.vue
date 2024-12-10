@@ -4,88 +4,178 @@
     <div class="chatbot-header">
       <h1>ChatBot DPI</h1>
     </div>
-    
+
     <div class="chat-window">
       <!-- Chat messages -->
       <div class="chat-log">
-        <div 
-          v-for="(message, index) in messages" 
-          :key="index" 
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
           :class="['message', message.sender]"
         >
           {{ message.text }}
         </div>
       </div>
     </div>
-    
-    <!-- User input -->
+
+    <!-- Zone de sélection entre saisie libre et liste déroulante -->
+    <div class="input-toggle">
+      <label>
+        <input
+          type="radio"
+          value="list"
+          v-model="inputMode"
+        />
+        Liste déroulante
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="free"
+          v-model="inputMode"
+        />
+        Saisie libre
+      </label>
+    </div>
+
+    <!-- Zone de saisie -->
     <div class="input-area">
-      <input 
-        v-model="userInput" 
-        placeholder="Tapez votre message..." 
-        @keyup.enter="sendMessage" 
-      />
-      <button @click="sendMessage">Envoyer</button>
+      <!-- Liste déroulante pour la catégorie -->
+      <div v-if="inputMode === 'list'">
+        <label for="categorySelect">Catégorie :</label>
+        <select v-model="selectedCategory" @change="fetchQuestionsForCategory">
+          <option value="" disabled>Choisissez une catégorie...</option>
+          <option v-for="(category, index) in categories" :key="index" :value="category">
+            {{ category }}
+          </option>
+        </select>
+
+        <!-- Liste déroulante pour les questions -->
+        <label for="questionSelect">Question :</label>
+        <select v-model="selectedQuestion" :disabled="!selectedCategory">
+          <option value="" disabled>Choisissez une question...</option>
+          <option v-for="(question, index) in questions" :key="index" :value="question">
+            {{ question }}
+          </option>
+        </select>
+        <button @click="sendMessage">Envoyer</button>
+      </div>
+
+      <!-- Saisie libre -->
+      <div v-else>
+        <input
+          v-model="freeText"
+          type="text"
+          placeholder="Posez votre question..."
+        />
+        <button @click="sendMessage">Envoyer</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'MyChatbot',
+  name: "MyChatbot",
   data() {
     return {
-      userInput: '', // Saisie de l'utilisateur
-      messages: []   // Historique des messages
+      inputMode: "list", // "list" ou "free" pour basculer entre les modes
+      selectedCategory: "", // Catégorie sélectionnée
+      selectedQuestion: "", // Question sélectionnée dans la liste
+      freeText: "", // Texte libre saisi par l'utilisateur
+      categories: [], // Liste des catégories
+      questions: [], // Liste des questions
+      messages: [], // Historique des messages
     };
   },
+  created() {
+    this.fetchCategories(); // Récupère les catégories au chargement
+  },
   methods: {
-    async sendMessage() {
-      // Vérification : message vide
-      if (this.userInput.trim()) {
-        // Ajoute le message utilisateur dans l'historique
-        this.messages.push({ sender: 'user', text: this.userInput });
-
-        const userMessage = this.userInput; // Sauvegarde le message
-        this.userInput = ''; // Réinitialise le champ d'entrée
-        this.$nextTick(() => this.scrollToBottom()); // Scroll en bas
-
-        // Envoie la requête au backend pour récupérer la réponse
-        await this.fetchBotResponse(userMessage);
+    // Récupère les catégories depuis l'API
+    async fetchCategories() {
+      try {
+        const response = await fetch("http://localhost:3001/api/categories");
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération des catégories");
+        }
+        this.categories = await response.json();
+      } catch (error) {
+        console.error(error);
       }
     },
+
+    // Récupère les questions pour une catégorie spécifique
+    async fetchQuestionsForCategory() {
+      if (!this.selectedCategory) return;
+
+      try {
+        const response = await fetch(`http://localhost:3001/api/categories/${this.selectedCategory}/questions`);
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération des questions");
+        }
+        this.questions = await response.json();
+        this.selectedQuestion = ""; // Réinitialiser la question après le changement de catégorie
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async sendMessage() {
+      let userMessage = "";
+
+      // Détermine le message à envoyer selon le mode
+      if (this.inputMode === "list" && this.selectedQuestion) {
+        userMessage = this.selectedQuestion;
+        this.selectedQuestion = ""; // Réinitialise la sélection
+      } else if (this.inputMode === "free" && this.freeText.trim()) {
+        userMessage = this.freeText.trim();
+        this.freeText = ""; // Réinitialise le champ texte
+      } else {
+        // Aucun message valide
+        alert("Veuillez entrer une question !");
+        return;
+      }
+
+      // Ajoute le message utilisateur dans l'historique
+      this.messages.push({ sender: "user", text: userMessage });
+      this.$nextTick(() => this.scrollToBottom());
+
+      // Envoie la requête au backend pour récupérer la réponse
+      await this.fetchBotResponse(userMessage);
+    },
+
     async fetchBotResponse(userMessage) {
       try {
-        // Envoie de la requête au backend
-        const response = await fetch('http://localhost:3001/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage }) // Envoie du message
+        const response = await fetch("http://localhost:3001/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage }),
         });
 
         if (!response.ok) {
-          throw new Error('Erreur lors de la communication avec le serveur');
+          throw new Error("Erreur lors de la communication avec le serveur");
         }
 
-        const data = await response.json(); // Récupère la réponse du backend
-
-        // Ajoute la réponse du bot dans l'historique
-        this.messages.push({ sender: 'bot', text: data.reply });
+        const data = await response.json();
+        this.messages.push({ sender: "bot", text: data.reply });
         this.$nextTick(() => this.scrollToBottom());
       } catch (error) {
         console.error(error);
-        // Message d'erreur en cas de problème
-        this.messages.push({ sender: 'bot', text: 'Une erreur est survenue. Réessayez plus tard.' });
+        this.messages.push({
+          sender: "bot",
+          text: "Une erreur est survenue. Réessayez plus tard.",
+        });
       }
     },
+
     scrollToBottom() {
-      // Scroll automatique vers le bas de la fenêtre
-      const chatWindow = this.$el.querySelector('.chat-window');
+      const chatWindow = this.$el.querySelector(".chat-window");
       if (chatWindow) {
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -155,13 +245,15 @@ export default {
 
 /* Zone de saisie */
 .input-area {
-  display: flex;
+  width: 100%;
   padding: 10px;
   background-color: #fff;
   border-top: 1px solid #ddd;
 }
 
+
 .input-area input {
+  width: 70%;
   flex: 1;
   padding: 8px;
   border-radius: 5px;
@@ -170,6 +262,7 @@ export default {
 }
 
 .input-area button {
+  width: 20%;
   padding: 8px 15px;
   background-color: #007bff;
   color: white;
@@ -180,5 +273,11 @@ export default {
 
 .input-area button:hover {
   background-color: #0056b3;
+}
+
+.input-toggle {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-around;
 }
 </style>
