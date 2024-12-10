@@ -40,19 +40,28 @@
 
     <!-- Zone de saisie -->
     <div class="input-area">
-      <!-- Liste déroulante pour la catégorie -->
+      <!-- Liste déroulante pour les catégories principales -->
       <div v-if="inputMode === 'list'">
-        <label for="categorySelect">Catégorie :</label>
-        <select v-model="selectedCategory" @change="fetchQuestionsForCategory">
-          <option value="" disabled>Choisissez une catégorie...</option>
-          <option v-for="(category, index) in categories" :key="index" :value="category">
+        <label for="mainCategorySelect">Catégorie principale :</label>
+        <select v-model="selectedMainCategory" @change="fetchSubCategories">
+          <option value="" disabled>Choisissez une catégorie principale...</option>
+          <option v-for="(category, index) in mainCategories" :key="index" :value="category">
             {{ category }}
+          </option>
+        </select>
+
+        <!-- Liste déroulante pour les sous-catégories -->
+        <label for="subCategorySelect">Sous-catégorie :</label>
+        <select v-model="selectedSubCategory" @change="fetchQuestionsForSubCategory" :disabled="!selectedMainCategory">
+          <option value="" disabled>Choisissez une sous-catégorie...</option>
+          <option v-for="(subCategory, index) in subCategories" :key="index" :value="subCategory">
+            {{ subCategory }}
           </option>
         </select>
 
         <!-- Liste déroulante pour les questions -->
         <label for="questionSelect">Question :</label>
-        <select v-model="selectedQuestion" :disabled="!selectedCategory">
+        <select v-model="selectedQuestion" :disabled="!selectedSubCategory">
           <option value="" disabled>Choisissez une question...</option>
           <option v-for="(question, index) in questions" :key="index" :value="question">
             {{ question }}
@@ -80,42 +89,64 @@ export default {
   data() {
     return {
       inputMode: "list", // "list" ou "free" pour basculer entre les modes
-      selectedCategory: "", // Catégorie sélectionnée
+      selectedMainCategory: "", // Catégorie principale sélectionnée
+      selectedSubCategory: "", // Sous-catégorie sélectionnée
       selectedQuestion: "", // Question sélectionnée dans la liste
       freeText: "", // Texte libre saisi par l'utilisateur
-      categories: [], // Liste des catégories
+      mainCategories: [], // Liste des catégories principales
+      subCategories: [], // Liste des sous-catégories
       questions: [], // Liste des questions
       messages: [], // Historique des messages
     };
   },
   created() {
-    this.fetchCategories(); // Récupère les catégories au chargement
+    this.fetchMainCategories(); // Récupère les catégories principales au chargement
   },
   methods: {
-    // Récupère les catégories depuis l'API
-    async fetchCategories() {
+    // Récupère les catégories principales depuis l'API
+    async fetchMainCategories() {
       try {
         const response = await fetch("http://localhost:3001/api/categories");
         if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des catégories");
+          throw new Error("Erreur lors de la récupération des catégories principales");
         }
-        this.categories = await response.json();
+        this.mainCategories = await response.json();
       } catch (error) {
         console.error(error);
       }
     },
 
-    // Récupère les questions pour une catégorie spécifique
-    async fetchQuestionsForCategory() {
-      if (!this.selectedCategory) return;
+    // Récupère les sous-catégories pour une catégorie principale
+    async fetchSubCategories() {
+      if (!this.selectedMainCategory) return;
 
       try {
-        const response = await fetch(`http://localhost:3001/api/categories/${this.selectedCategory}/questions`);
+        const response = await fetch(`http://localhost:3001/api/categories/${this.selectedMainCategory}`);
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération des sous-catégories");
+        }
+        const categoryData = await response.json();
+        this.subCategories = Object.keys(categoryData); // Sous-catégories
+        this.selectedSubCategory = ""; // Réinitialise la sélection de sous-catégorie
+        this.questions = []; // Réinitialise les questions
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    // Récupère les questions pour une sous-catégorie spécifique
+    async fetchQuestionsForSubCategory() {
+      if (!this.selectedSubCategory || !this.selectedMainCategory) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/categories/${this.selectedMainCategory}/${this.selectedSubCategory}/questions`
+        );
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération des questions");
         }
         this.questions = await response.json();
-        this.selectedQuestion = ""; // Réinitialiser la question après le changement de catégorie
+        this.selectedQuestion = ""; // Réinitialise la question après le changement de sous-catégorie
       } catch (error) {
         console.error(error);
       }
@@ -178,6 +209,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 /* Ajout d'une couleur de fond pour toute la page */
