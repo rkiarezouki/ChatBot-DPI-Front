@@ -42,7 +42,7 @@
     <div class="input-area">
       <!-- Liste déroulante pour les catégories principales -->
       <div v-if="inputMode === 'list'">
-        <label for="mainCategorySelect">Catégorie principale :</label>
+        <label for="mainCategorySelect"> Catégorie principale : </label>
         <select v-model="selectedMainCategory" @change="fetchSubCategories">
           <option value="" disabled>Choisissez une catégorie principale...</option>
           <option v-for="(category, index) in mainCategories" :key="index" :value="category">
@@ -51,7 +51,7 @@
         </select>
 
         <!-- Liste déroulante pour les sous-catégories -->
-        <label for="subCategorySelect">Sous-catégorie :</label>
+        <label for="subCategorySelect"> Sous-catégorie : </label>
         <select v-model="selectedSubCategory" @change="fetchQuestionsForSubCategory" :disabled="!selectedMainCategory">
           <option value="" disabled>Choisissez une sous-catégorie...</option>
           <option v-for="(subCategory, index) in subCategories" :key="index" :value="subCategory">
@@ -60,7 +60,7 @@
         </select>
 
         <!-- Liste déroulante pour les questions -->
-        <label for="questionSelect">Question :</label>
+        <label for="questionSelect"> Question : </label>
         <select v-model="selectedQuestion" :disabled="!selectedSubCategory">
           <option value="" disabled>Choisissez une question...</option>
           <option v-for="(question, index) in questions" :key="index" :value="question">
@@ -76,12 +76,19 @@
           v-model="freeText"
           type="text"
           placeholder="Posez votre question..."
+          @keyup.enter="sendMessage"
         />
         <button @click="sendMessage">Envoyer</button>
       </div>
     </div>
+
+    <!-- Message pour contacter le support -->
+    <div class="support-message">
+      <p>Si vous ne trouvez pas les réponses à vos questions, <a href="mailto:support@example.com">contactez le support</a>.</p>
+    </div>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -249,6 +256,23 @@ export default {
   font-size: 20px;
 }
 
+.support-message {
+  text-align: center;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.support-message a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.support-message a:hover {
+  text-decoration: underline;
+}
 /* Fenêtre de chat */
 .chat-window {
   flex: 1;
@@ -283,7 +307,6 @@ export default {
   border-top: 1px solid #ddd;
 }
 
-
 .input-area input {
   width: 70%;
   flex: 1;
@@ -295,7 +318,7 @@ export default {
 
 .input-area button {
   width: 20%;
-  padding: 8px 15px;
+  padding: 10px 15px;
   background-color: #007bff;
   color: white;
   border: none;
