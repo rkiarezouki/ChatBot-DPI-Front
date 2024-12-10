@@ -1,7 +1,12 @@
 <template>
   <div class="chatbot-container">
+    <!-- Titre -->
+    <div class="chatbot-header">
+      <h1>ChatBot DPI</h1>
+    </div>
+    
     <div class="chat-window">
-      <!-- Affichage des messages -->
+      <!-- Chat messages -->
       <div class="chat-log">
         <div 
           v-for="(message, index) in messages" 
@@ -13,7 +18,7 @@
       </div>
     </div>
     
-    <!-- Zone de saisie -->
+    <!-- User input -->
     <div class="input-area">
       <input 
         v-model="userInput" 
@@ -85,16 +90,44 @@ export default {
 </script>
 
 <style scoped>
+/* Ajout d'une couleur de fond pour toute la page */
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f2f5; /* Couleur de fond */
+}
+
 .chatbot-container {
-  width: 100%;
-  height: 550px;
+  width: 70%; /* Augmente la largeur pour occuper plus d'espace */
+  max-width: 80%; /* Limite maximale de largeur */
+  height: 80vh; /* La hauteur reste dynamique */
+  margin: 20px auto; /* Centre horizontalement avec auto et ajoute un espace au-dessus */
   border: 1px solid #ccc;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   background-color: #f4f4f4;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ajoute une ombre pour plus d'élégance */
 }
 
+/* Style du header */
+.chatbot-header {
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.chatbot-header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* Fenêtre de chat */
 .chat-window {
   flex: 1;
   padding: 10px;
@@ -120,6 +153,7 @@ export default {
   background-color: #e0e0e0;
 }
 
+/* Zone de saisie */
 .input-area {
   display: flex;
   padding: 10px;
