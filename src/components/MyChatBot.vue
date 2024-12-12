@@ -84,8 +84,16 @@
 
     <!-- Message pour contacter le support -->
     <div class="support-message">
-      <p>Si vous ne trouvez pas les réponses à vos questions, <a href="mailto:support@example.com">contactez le support</a>.</p>
+      <p>
+        Si vous ne trouvez pas les réponses à vos questions,
+        <a href="mailto:support@example.com">contactez le support</a>.
+      </p>
+      <p>
+        Vous pouvez consultez aussi nos <a href="/Dm_3608.pdf" target="_blank">Documentation utilisateur Crossway hôpital médecins</a>
+        et <a href="/Dm_5357.pdf" target="_blank">Documentation utilisateur Crossway hôpital module DSI</a>.
+      </p>
     </div>
+
   </div>
 </template>
 
