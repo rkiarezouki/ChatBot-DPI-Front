@@ -86,7 +86,7 @@
     <div class="support-message">
       <p>
         Si vous ne trouvez pas les réponses à vos questions,
-        <a href="mailto:support@example.com">contactez le support</a>.
+        <a href="mailto:informatique@ch-carcassonne.fr">contactez le support</a>.
       </p>
       <p>
         Vous pouvez consultez aussi nos <a href="/Dm_3608.pdf" target="_blank">Documentation utilisateur Crossway hôpital médecins</a>
