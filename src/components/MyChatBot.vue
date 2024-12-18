@@ -121,7 +121,7 @@ export default {
     // Récupère les catégories principales depuis l'API
     async fetchMainCategories() {
       try {
-        const response = await fetch("http://localhost:3001/api/categories");
+        const response = await fetch("https://chatbot-dpi-back.onrender.com/api/categories");
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération des catégories principales");
         }
@@ -136,7 +136,7 @@ export default {
       if (!this.selectedMainCategory) return;
 
       try {
-        const response = await fetch(`http://localhost:3001/api/categories/${this.selectedMainCategory}`);
+        const response = await fetch(`https://chatbot-dpi-back.onrender.com/api/categories/${this.selectedMainCategory}`);
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération des sous-catégories");
         }
@@ -155,7 +155,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:3001/api/categories/${this.selectedMainCategory}/${this.selectedSubCategory}/questions`
+          `https://chatbot-dpi-back.onrender.com/api/categories/${this.selectedMainCategory}/${this.selectedSubCategory}/questions`
         );
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération des questions");
@@ -193,7 +193,7 @@ export default {
 
     async fetchBotResponse(userMessage) {
       try {
-        const response = await fetch("http://localhost:3001/api/chat", {
+        const response = await fetch("https://chatbot-dpi-back.onrender.com/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: userMessage }),
