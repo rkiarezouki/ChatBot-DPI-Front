@@ -7,5 +7,6 @@ module.exports = defineConfig({
   },
   devServer: {
     proxy: 'https://chatbot-dpi-back.onrender.com'
-  }
+  }, 
+  publicPath: '/'
 })
